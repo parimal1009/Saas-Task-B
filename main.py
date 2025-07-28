@@ -3,14 +3,24 @@ from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from fastapi.middleware.gzip import GZipMiddleware
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, EmailStr
-import uvicorn
 from datetime import datetime
 import json
 import os
 from typing import Optional
+from mangum import Mangum
 
 app = FastAPI(title="NeuralFlow SaaS", description="The Future of Business Intelligence")
+
+# Add CORS middleware for Vercel
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # Add Gzip compression middleware
 app.add_middleware(GZipMiddleware, minimum_size=1000)
@@ -25,8 +35,12 @@ if not os.path.exists("static"):
 
 templates = Jinja2Templates(directory="templates")
 
-# Mount static files
-app.mount("/static", StaticFiles(directory="static"), name="static")
+# Mount static files (for local development)
+try:
+    app.mount("/static", StaticFiles(directory="static"), name="static")
+except Exception:
+    # Vercel handles static files differently
+    pass
 
 # Data models
 class ContactForm(BaseModel):
@@ -58,11 +72,12 @@ async def home(request: Request):
 
 @app.get("/health")
 async def health_check():
-    """Health check endpoint for Render"""
+    """Health check endpoint for Vercel"""
     return {
         "status": "healthy", 
         "timestamp": datetime.now().isoformat(),
-        "service": "NeuralFlow SaaS"
+        "service": "NeuralFlow SaaS",
+        "platform": "Vercel"
     }
 
 @app.post("/api/contact")
@@ -264,7 +279,5 @@ async def get_pricing():
     ]
     return JSONResponse({"plans": plans})
 
-if __name__ == "__main__":
-    # Use environment variable for port (required by Render)
-    port = int(os.environ.get("PORT", 8000))
-    uvicorn.run("main:app", host="0.0.0.0", port=port)
+# Create the handler for Vercel
+handler = Mangum(app)
