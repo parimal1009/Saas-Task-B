@@ -1,4 +1,4 @@
-# 🧠 NeuralFlow SaaS - The Future of Business Intelligence
+# 🧠 NeuralFlow SaaS – The Future of Business Intelligence
 
 [![Python](https://img.shields.io/badge/Python-3.11+-blue.svg)](https://www.python.org/downloads/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.104+-green.svg)](https://fastapi.tiangolo.com)
@@ -11,73 +11,71 @@
 
 ![Hero](https://github.com/parimal1009/Saas-Task-B/blob/main/images/Screenshot%202025-07-28%20223828.png?raw=true)
 
+---
+
 ## ✨ Features
 
-- 🧠 **AI-Powered Analytics** – Predictive modeling and insights
-- 📊 **Real-Time Dashboards** – Interactive, elegant, and fast
-- ⚡ **Smart Automation** – Optimize workflows automatically
-- 🔒 **Enterprise-Grade Security** – GDPR, SOC2, HIPAA compliant
-- ☁️ **Cloud Integrations** – 100+ services, one platform
-- 🎯 **Intelligent Alerts** – Notifications for anomalies and trends
+- 🧠 **AI-Powered Analytics** – Predictive modeling and deep insights
+- 📊 **Real-Time Dashboards** – Beautiful, live, interactive visualizations
+- ⚡ **Smart Automation** – Automated workflows and operations
+- 🔒 **Enterprise Security** – GDPR, SOC2, HIPAA compliant
+- ☁️ **Cloud Integrations** – 100+ tools and platforms supported
+- 🎯 **Intelligent Alerts** – Get notified about anomalies and milestones
 
 ---
 
 ## 🌐 Live Demo
 
-🔗 [Try NeuralFlow Now](https://neuralflow-saas.onrender.com)
+👉 [Try it Now](https://neuralflow-saas.onrender.com)
 
 ---
 
 ## 📸 UI Screenshots
 
-<details>
-<summary>🖼️ Click to view all UI screens</summary>
-
-### Landing Page  
+### 🔹 Landing Page
 ![Landing](https://github.com/parimal1009/Saas-Task-B/blob/main/images/Screenshot%202025-07-28%20223828.png?raw=true)
 
-### Hero Section  
-![Hero Section](https://github.com/parimal1009/Saas-Task-B/blob/main/images/Screenshot%202025-07-28%20223841.png?raw=true)
+### 🔹 Hero Section
+![Hero](https://github.com/parimal1009/Saas-Task-B/blob/main/images/Screenshot%202025-07-28%20223841.png?raw=true)
 
-### Analytics Dashboard  
-![Analytics](https://github.com/parimal1009/Saas-Task-B/blob/main/images/Screenshot%202025-07-28%20223853.png?raw=true)
+### 🔹 Analytics Dashboard
+![Dashboard](https://github.com/parimal1009/Saas-Task-B/blob/main/images/Screenshot%202025-07-28%20223853.png?raw=true)
 
-### Features Showcase  
+### 🔹 Features Section
 ![Features](https://github.com/parimal1009/Saas-Task-B/blob/main/images/Screenshot%202025-07-28%20223902.png?raw=true)
 
-### Pricing Page  
+### 🔹 Pricing Plans
 ![Pricing](https://github.com/parimal1009/Saas-Task-B/blob/main/images/Screenshot%202025-07-28%20223911.png?raw=true)
 
-### CTA & Contact  
+### 🔹 Call to Action / Contact Form
 ![CTA](https://github.com/parimal1009/Saas-Task-B/blob/main/images/Screenshot%202025-07-28%20223922.png?raw=true)
 
-### Footer Section  
+### 🔹 Footer
 ![Footer](https://github.com/parimal1009/Saas-Task-B/blob/main/images/Screenshot%202025-07-28%20223932.png?raw=true)
-
-</details>
 
 ---
 
 ## 🛠 Tech Stack
 
 - **Backend**: FastAPI (Python 3.11+)
-- **Frontend**: HTML5, CSS3, JavaScript
-- **Styling**: Glassmorphism, responsive design
-- **Animations**: GSAP, AOS, Particles.js
-- **Graphics**: Three.js
+- **Frontend**: HTML5, CSS3, JavaScript (ES6+)
+- **Styling**: Glassmorphism, Gradient backgrounds
+- **Animations**: AOS, GSAP, Particles.js
+- **3D Graphics**: Three.js
 - **Deployment**: Render.com
+- **Validation**: Pydantic + EmailStr
 
 ---
 
 ## 📦 Installation
 
-### Prerequisites
+### ✅ Prerequisites
 
 - Python 3.11+
-- `pip` package manager
+- `pip`
 - Git
 
-### Setup Instructions
+### 💻 Local Setup
 
 ```bash
 # Clone the repo
@@ -86,13 +84,14 @@ cd neuralflow-saas
 
 # Create virtual environment
 python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+source venv/bin/activate  # Windows: venv\Scripts\activate
 
 # Install dependencies
 pip install -r requirements.txt
 
-# Run server
-python main.py
+# Create structure
+mkdir -p templates static/css static/js static/images
+mv index.html templates/
 
-# Visit in browser
-http://localhost:8000
+# Run the app
+python main.py
