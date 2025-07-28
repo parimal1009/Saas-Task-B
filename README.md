@@ -9,8 +9,6 @@
 
 ---
 
-![Hero](https://github.com/parimal1009/Saas-Task-B/blob/main/images/Screenshot%202025-07-28%20223828.png?raw=true)
-
 ---
 
 ## ✨ Features
