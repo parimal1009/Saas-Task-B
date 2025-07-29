@@ -36,6 +36,10 @@ if not os.path.exists("templates"):
 if not os.path.exists("static"):
     os.makedirs("static")
 
+# Create data directory if it doesn't exist
+if not os.path.exists("data"):
+    os.makedirs("data")
+
 templates = Jinja2Templates(directory="templates")
 
 # Mount static files
@@ -73,27 +77,79 @@ async def home(request: Request):
     try:
         return templates.TemplateResponse("index.html", {"request": request})
     except Exception as e:
-        # Fallback to serve HTML directly if templates don't work
+        print(f"Template error: {e}")
+        # Fallback HTML content
         html_content = """
         <!DOCTYPE html>
-        <html>
+        <html lang="en">
         <head>
-            <title>NeuralFlow - Loading...</title>
-            <meta charset="utf-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1">
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>NeuralFlow - The Future of Business Intelligence</title>
+            <style>
+                body {
+                    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+                    margin: 0;
+                    padding: 0;
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    min-height: 100vh;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    color: white;
+                    text-align: center;
+                }
+                .container {
+                    max-width: 800px;
+                    padding: 2rem;
+                }
+                h1 {
+                    font-size: 3rem;
+                    margin-bottom: 1rem;
+                    background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+                    -webkit-background-clip: text;
+                    -webkit-text-fill-color: transparent;
+                }
+                p {
+                    font-size: 1.2rem;
+                    margin-bottom: 2rem;
+                    opacity: 0.9;
+                }
+                .btn {
+                    background: linear-gradient(45deg, #6366f1, #06b6d4);
+                    color: white;
+                    padding: 1rem 2rem;
+                    border: none;
+                    border-radius: 50px;
+                    font-size: 1.1rem;
+                    font-weight: 600;
+                    cursor: pointer;
+                    text-decoration: none;
+                    display: inline-block;
+                    transition: transform 0.3s ease;
+                    box-shadow: 0 8px 25px rgba(99, 102, 241, 0.3);
+                }
+                .btn:hover {
+                    transform: translateY(-3px);
+                }
+                .status {
+                    margin-top: 2rem;
+                    font-size: 0.9rem;
+                    opacity: 0.7;
+                }
+            </style>
         </head>
         <body>
-            <div style="display: flex; justify-content: center; align-items: center; height: 100vh; font-family: Arial, sans-serif;">
-                <div style="text-align: center;">
-                    <h1>🧠 NeuralFlow</h1>
-                    <p>The Future of Business Intelligence</p>
-                    <p><em>Loading application...</em></p>
+            <div class="container">
+                <h1>🧠 NeuralFlow</h1>
+                <p>The Future of Business Intelligence</p>
+                <p>Transform your business with AI-powered analytics, real-time dashboards, and intelligent automation.</p>
+                <a href="/health" class="btn">Check Service Status</a>
+                <div class="status">
+                    <p>Service is running successfully on Render! 🚀</p>
+                    <p>Template loading in progress...</p>
                 </div>
             </div>
-            <script>
-                // Redirect to load the full page after templates are ready
-                setTimeout(() => window.location.reload(), 2000);
-            </script>
         </body>
         </html>
         """
@@ -107,7 +163,9 @@ async def health_check():
         "timestamp": datetime.now().isoformat(),
         "service": "NeuralFlow SaaS",
         "platform": "Render",
-        "environment": os.getenv("ENVIRONMENT", "development")
+        "environment": os.getenv("ENVIRONMENT", "development"),
+        "port": os.getenv("PORT", "8000"),
+        "python_version": "3.11"
     }
 
 @app.post("/api/contact")
