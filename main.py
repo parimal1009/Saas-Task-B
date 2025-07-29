@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Request, Form, HTTPException
+from fastapi import FastAPI, Request, HTTPException
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
@@ -9,11 +9,14 @@ from datetime import datetime
 import json
 import os
 from typing import Optional
-from mangum import Mangum
 
-app = FastAPI(title="NeuralFlow SaaS", description="The Future of Business Intelligence")
+app = FastAPI(
+    title="NeuralFlow SaaS", 
+    description="The Future of Business Intelligence",
+    version="1.0.0"
+)
 
-# Add CORS middleware for Vercel
+# Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -35,12 +38,11 @@ if not os.path.exists("static"):
 
 templates = Jinja2Templates(directory="templates")
 
-# Mount static files (for local development)
+# Mount static files
 try:
     app.mount("/static", StaticFiles(directory="static"), name="static")
-except Exception:
-    # Vercel handles static files differently
-    pass
+except Exception as e:
+    print(f"Warning: Could not mount static files: {e}")
 
 # Data models
 class ContactForm(BaseModel):
@@ -68,60 +70,99 @@ demo_requests = []
 @app.get("/", response_class=HTMLResponse)
 async def home(request: Request):
     """Serve the main landing page"""
-    return templates.TemplateResponse("index.html", {"request": request})
+    try:
+        return templates.TemplateResponse("index.html", {"request": request})
+    except Exception as e:
+        # Fallback to serve HTML directly if templates don't work
+        html_content = """
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>NeuralFlow - Loading...</title>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1">
+        </head>
+        <body>
+            <div style="display: flex; justify-content: center; align-items: center; height: 100vh; font-family: Arial, sans-serif;">
+                <div style="text-align: center;">
+                    <h1>🧠 NeuralFlow</h1>
+                    <p>The Future of Business Intelligence</p>
+                    <p><em>Loading application...</em></p>
+                </div>
+            </div>
+            <script>
+                // Redirect to load the full page after templates are ready
+                setTimeout(() => window.location.reload(), 2000);
+            </script>
+        </body>
+        </html>
+        """
+        return HTMLResponse(content=html_content)
 
 @app.get("/health")
 async def health_check():
-    """Health check endpoint for Vercel"""
+    """Health check endpoint for Render"""
     return {
         "status": "healthy", 
         "timestamp": datetime.now().isoformat(),
         "service": "NeuralFlow SaaS",
-        "platform": "Vercel"
+        "platform": "Render",
+        "environment": os.getenv("ENVIRONMENT", "development")
     }
 
 @app.post("/api/contact")
 async def submit_contact(contact: ContactForm):
     """Handle contact form submissions"""
-    contact_data = contact.dict()
-    contact_data["timestamp"] = datetime.now().isoformat()
-    contacts.append(contact_data)
-    
-    return JSONResponse({
-        "status": "success",
-        "message": "Thank you for your message! We'll get back to you within 24 hours.",
-        "data": contact_data
-    })
+    try:
+        contact_data = contact.dict()
+        contact_data["timestamp"] = datetime.now().isoformat()
+        contacts.append(contact_data)
+        
+        return JSONResponse({
+            "status": "success",
+            "message": "Thank you for your message! We'll get back to you within 24 hours.",
+            "data": contact_data
+        })
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error processing contact form: {str(e)}")
 
 @app.post("/api/newsletter")
 async def subscribe_newsletter(signup: NewsletterSignup):
     """Handle newsletter subscriptions"""
-    # Check if email already exists
-    if any(sub["email"] == signup.email for sub in newsletter_subscribers):
-        raise HTTPException(status_code=400, detail="Email already subscribed")
-    
-    subscriber_data = signup.dict()
-    subscriber_data["timestamp"] = datetime.now().isoformat()
-    newsletter_subscribers.append(subscriber_data)
-    
-    return JSONResponse({
-        "status": "success",
-        "message": "🎉 Welcome to the future! You're now subscribed to our newsletter.",
-        "subscriber_count": len(newsletter_subscribers)
-    })
+    try:
+        # Check if email already exists
+        if any(sub["email"] == signup.email for sub in newsletter_subscribers):
+            raise HTTPException(status_code=400, detail="Email already subscribed")
+        
+        subscriber_data = signup.dict()
+        subscriber_data["timestamp"] = datetime.now().isoformat()
+        newsletter_subscribers.append(subscriber_data)
+        
+        return JSONResponse({
+            "status": "success",
+            "message": "🎉 Welcome to the future! You're now subscribed to our newsletter.",
+            "subscriber_count": len(newsletter_subscribers)
+        })
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error subscribing to newsletter: {str(e)}")
 
 @app.post("/api/demo")
 async def request_demo(demo: DemoRequest):
     """Handle demo requests"""
-    demo_data = demo.dict()
-    demo_data["timestamp"] = datetime.now().isoformat()
-    demo_requests.append(demo_data)
-    
-    return JSONResponse({
-        "status": "success",
-        "message": "🚀 Demo request received! Our team will contact you within 2 hours to schedule your personalized demo.",
-        "data": demo_data
-    })
+    try:
+        demo_data = demo.dict()
+        demo_data["timestamp"] = datetime.now().isoformat()
+        demo_requests.append(demo_data)
+        
+        return JSONResponse({
+            "status": "success",
+            "message": "🚀 Demo request received! Our team will contact you within 2 hours to schedule your personalized demo.",
+            "data": demo_data
+        })
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error processing demo request: {str(e)}")
 
 @app.get("/api/stats")
 async def get_stats():
@@ -133,7 +174,8 @@ async def get_stats():
         "uptime": "99.99%",
         "newsletter_subscribers": len(newsletter_subscribers),
         "demo_requests": len(demo_requests),
-        "contact_submissions": len(contacts)
+        "contact_submissions": len(contacts),
+        "last_updated": datetime.now().isoformat()
     })
 
 @app.get("/api/features")
@@ -143,44 +185,44 @@ async def get_features():
         {
             "id": 1,
             "title": "AI-Powered Analytics",
-            "description": "Leverage machine learning to uncover hidden insights in your data with real-time predictive analytics.",
+            "description": "Leverage machine learning to uncover hidden insights in your data with real-time predictive analytics and intelligent recommendations.",
             "icon": "🧠",
             "category": "Analytics"
         },
         {
             "id": 2,
             "title": "Real-Time Dashboards",
-            "description": "Beautiful, interactive dashboards that update in real-time with stunning visualizations.",
+            "description": "Beautiful, interactive dashboards that update in real-time with stunning visualizations and customizable widgets.",
             "icon": "📊",
             "category": "Visualization"
         },
         {
             "id": 3,
-            "title": "Advanced Security",
-            "description": "Enterprise-grade security with end-to-end encryption and compliance with SOC 2, GDPR, and HIPAA.",
-            "icon": "🔒",
-            "category": "Security"
+            "title": "Predictive Modeling",
+            "description": "Advanced forecasting algorithms that help you predict future trends and make proactive business decisions.",
+            "icon": "📈",
+            "category": "Analytics"
         },
         {
             "id": 4,
-            "title": "Cloud Integration",
-            "description": "Seamlessly connect with 100+ cloud services and APIs with zero-configuration setup.",
-            "icon": "☁️",
-            "category": "Integration"
-        },
-        {
-            "id": 5,
             "title": "Smart Automation",
-            "description": "Intelligent workflow automation that learns from your patterns and optimizes processes.",
+            "description": "Intelligent workflow automation that learns from your patterns and optimizes processes automatically.",
             "icon": "⚡",
             "category": "Automation"
         },
         {
+            "id": 5,
+            "title": "Enterprise Security",
+            "description": "End-to-end encryption and compliance with SOC 2, GDPR, and HIPAA standards for maximum data protection.",
+            "icon": "🔒",
+            "category": "Security"
+        },
+        {
             "id": 6,
-            "title": "Collaborative Workspaces",
-            "description": "Real-time collaboration tools with comments, sharing, and team management features.",
-            "icon": "👥",
-            "category": "Collaboration"
+            "title": "Cloud Integration",
+            "description": "Seamlessly connect with 100+ cloud services and APIs with zero-configuration setup and automatic syncing.",
+            "icon": "☁️",
+            "category": "Integration"
         }
     ]
     return JSONResponse({"features": features})
@@ -195,7 +237,7 @@ async def get_testimonials():
             "role": "CTO",
             "company": "TechFlow Inc.",
             "avatar": "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=100&h=100&fit=crop&crop=face",
-            "content": "NeuralFlow transformed our data strategy completely. The AI insights helped us increase revenue by 40% in just 3 months.",
+            "content": "NeuralFlow transformed our data strategy completely. The AI insights helped us increase revenue by 40% in just 3 months. The real-time dashboards are incredible.",
             "rating": 5
         },
         {
@@ -204,7 +246,7 @@ async def get_testimonials():
             "role": "Data Director",
             "company": "Global Dynamics",
             "avatar": "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face",
-            "content": "The real-time dashboards are incredible. Our team makes faster, smarter decisions every single day.",
+            "content": "The automation features saved us 20 hours per week. Our team makes faster, smarter decisions every single day. Implementation was seamless and ROI was visible within weeks.",
             "rating": 5
         },
         {
@@ -213,7 +255,7 @@ async def get_testimonials():
             "role": "VP Analytics",
             "company": "InnovateCorp",
             "avatar": "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop&crop=face",
-            "content": "Implementation was seamless, and the ROI was visible within weeks. This is the future of business intelligence.",
+            "content": "This is the future of business intelligence. The predictive analytics helped us avoid a major supply chain issue. Customer support is outstanding - truly a game changer.",
             "rating": 5
         }
     ]
@@ -279,5 +321,22 @@ async def get_pricing():
     ]
     return JSONResponse({"plans": plans})
 
-# Create the handler for Vercel
-handler = Mangum(app)
+# Error handlers
+@app.exception_handler(404)
+async def not_found_handler(request: Request, exc: HTTPException):
+    return JSONResponse(
+        status_code=404,
+        content={"message": "Page not found", "status_code": 404}
+    )
+
+@app.exception_handler(500)
+async def internal_error_handler(request: Request, exc: HTTPException):
+    return JSONResponse(
+        status_code=500,
+        content={"message": "Internal server error", "status_code": 500}
+    )
+
+if __name__ == "__main__":
+    import uvicorn
+    port = int(os.getenv("PORT", 8000))
+    uvicorn.run(app, host="0.0.0.0", port=port)

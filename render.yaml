@@ -11,4 +11,11 @@ services:
         value: 3.11.0
       - key: DEBUG
         value: false
+      - key: ENVIRONMENT
+        value: production
     healthCheckPath: /health
+    autoDeploy: true
+    disk:
+      name: neuralflow-disk
+      mountPath: /opt/render/project/src/data
+      sizeGB: 1
